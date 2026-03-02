@@ -34,10 +34,14 @@ function help() {
     echo " $ ./flash_orin.sh -f /data/images/<balenaOS.img> -m <device-type> --accept-license yes"
     echo "where <device-type> can be one of"
     echo "    jetson-agx-orin-devkit-64gb"
+    echo "    auvidea-x230d-agx-orin-64gb  (uses Auvidea BSP; image must be jetson-agx-orin-devkit-64gb fake)"
     echo "    jetson-orin-nx-xavier-nx-devkit"
     echo "    jetson-orin-nano-devkit-nvme"
     echo "    jetson-orin-nano-seeed-j3010"
     echo "    jetson-orin-nx-seeed-j4012"
+    echo ""
+    echo "For auvidea-x230d-agx-orin-64gb, bind-mount the Auvidea BSP kernel_out directory:"
+    echo " $ docker run ... -v /path/to/auvidea_x230d/kernel_out:/data/auvidea-bsp:ro ..."
 }
 
 # Parse arguments
@@ -91,9 +95,53 @@ elif [[ $balena_device_name = "jetson-orin-nx-xavier-nx-devkit" ]] || [[ $balena
 elif [[ $balena_device_name = "jetson-agx-orin-devkit-64gb" ]]; then
 	device_type="jetson-agx-orin-devkit"
 	device_dtb="tegra234-p3737-0000+p3701-0005.dtb"
+elif [[ $balena_device_name = "auvidea-x230d-agx-orin-64gb" ]]; then
+	# The Auvidea X230D uses the AGX Orin 64GB SoC (p3701-0005) but requires
+	# its own carrier-board-specific conf, pinmux, MB2 BCT and DTBs.
+	# The balenaOS image being flashed is built as jetson-agx-orin-devkit-64gb
+	# (faking devkit) — that is intentional and must be preserved.
+	device_type="auvidea-agx-orin"
+	device_dtb="tegra234-auvidea-X230+p3701-0005-nv.dtb"
 else
 	log ERROR "Unknown or unspecified device-type!"
 fi
+
+# inject_auvidea_bsp: copies Auvidea X230D carrier-board-specific files
+# (conf, pinmux DTSI, MB2 BCT DTS, DTBs) into the L4T BSP tree so that
+# flash.sh picks up the correct hardware configuration.
+# The balenaOS image being flashed remains the jetson-agx-orin-devkit-64gb
+# fake — this only affects the low-level RCM boot/flash configuration.
+function inject_auvidea_bsp() {
+    local auvidea_bsp="/data/auvidea-bsp"
+    if [ ! -d "${auvidea_bsp}" ]; then
+        log ERROR "Auvidea BSP not found at ${auvidea_bsp}. Run the container with: -v /path/to/auvidea_x230d/kernel_out:/data/auvidea-bsp:ro"
+    fi
+    local l4t="${work_dir}/${device_dir}${lt_dir}"
+
+    log "Injecting Auvidea X230D BSP files into L4T BSP tree..."
+
+    # Carrier-board conf files (sourced by flash.sh via device_type=auvidea-agx-orin)
+    cp "${auvidea_bsp}/auvidea-agx-orin.conf"           "${l4t}/"
+    cp "${auvidea_bsp}/auvidea-X230-p3701-0000.conf"    "${l4t}/"
+    cp "${auvidea_bsp}/auvidea-p3701-base.conf.common"  "${l4t}/"
+
+    # Auvidea-specific pinmux and MB2 BCT (replaces NVIDIA devkit equivalents)
+    cp "${auvidea_bsp}/bootloader/generic/BCT/tegra234-mb1-bct-pinmux-auvidea-X230.dtsi" \
+        "${l4t}/bootloader/generic/BCT/"
+    cp "${auvidea_bsp}/bootloader/generic/BCT/tegra234-mb2-bct-misc-auvidea-agx-orin-0000.dts" \
+        "${l4t}/bootloader/generic/BCT/"
+    cp "${auvidea_bsp}/bootloader/generic/BCT/tegra234-mb2-bct-misc-auvidea-agx-orin-0008.dts" \
+        "${l4t}/bootloader/generic/BCT/"
+
+    # Auvidea DTBs and DTBOs
+    cp "${auvidea_bsp}/kernel/dtb/tegra234-auvidea-X230+p3701-0000-nv.dtb"      "${l4t}/kernel/dtb/"
+    cp "${auvidea_bsp}/kernel/dtb/tegra234-auvidea-X230+p3701-0004-nv.dtb"      "${l4t}/kernel/dtb/"
+    cp "${auvidea_bsp}/kernel/dtb/tegra234-auvidea-X230+p3701-0005-nv.dtb"      "${l4t}/kernel/dtb/"
+    cp "${auvidea_bsp}/kernel/dtb/tegra234-auvidea-X230+p3701-0008-nv.dtb"      "${l4t}/kernel/dtb/"
+    cp "${auvidea_bsp}/kernel/dtb/tegra234-auvidea-X230+p3701-0000-dynamic.dtbo" "${l4t}/kernel/dtb/"
+
+    log "Auvidea BSP injection complete."
+}
 
 cleanup () {
 	exit_code=$?
@@ -119,6 +167,10 @@ function setup_orin_rcmboot() {
     echo " " > "${device_dir}${lt_dir}/rootfs/boot/extlinux/extlinux.conf"
     sed -i 's/console=tty0/root=LABEL=flash-rootA flasher rootdelay=1 debug loglevel=7 roottimeout=360 jf_rcm_boot=1 /g' "${device_dir}${lt_dir}/p3767.conf.common"
     sed -i 's/console=tty0/root=LABEL=flash-rootA flasher rootdelay=1 debug loglevel=7 roottimeout=360 jf_rcm_boot=1 /g' "${device_dir}${lt_dir}/p3701.conf.common"
+    # Auvidea conf chain does not source p3701.conf.common; patch its own base conf instead
+    if [[ $balena_device_name = "auvidea-x230d-agx-orin-64gb" ]]; then
+        sed -i 's/console=tty0/root=LABEL=flash-rootA flasher rootdelay=1 debug loglevel=7 roottimeout=360 jf_rcm_boot=1 /g' "${device_dir}${lt_dir}/auvidea-p3701-base.conf.common"
+    fi
     # tegra234-mb2-bct-common.dtsi for AGX Orin and tegra234-mb2-bct-misc-p3767-0000.dts for Orin NX/Nano carrier boards which don't have eeproms
     sed -i 's/cvb_eeprom_read_size = <0x100>/cvb_eeprom_read_size = <0x0>/g' "${device_dir}${lt_dir}/bootloader/tegra234-mb2-bct-common.dtsi"
     sed -i 's/cvb_eeprom_read_size = <0x100>/cvb_eeprom_read_size = <0x0>/g' "${device_dir}${lt_dir}/bootloader/generic/BCT/tegra234-mb2-bct-misc-p3767-0000.dts"
@@ -153,6 +205,13 @@ rm "${work_dir}/${device_dir}${lt_dir}/bootloader/boot0.img" || true
 cp "${balena_image_flasher_root_mnt}/boot/Image" "${device_dir}/${lt_dir}/kernel/Image"
 log "Kernel image has been extracted and the BSP kernel has been replaced with the one in balenaOS"
 
+# Inject Auvidea carrier-board-specific files before flash.sh is invoked.
+# The balenaOS image (fake devkit) is left untouched — only the L4T BSP
+# hardware configuration is updated here.
+if [[ $balena_device_name = "auvidea-x230d-agx-orin-64gb" ]]; then
+    inject_auvidea_bsp
+fi
+
 setup_orin_rcmboot
 
 # Prepare boot binaries. We use mmcblk0p1 as a dummy root to make the flash.sh script happy. This argument is not used during actual flashing.
@@ -160,3 +219,4 @@ setup_orin_rcmboot
 cd "${work_dir}/${device_dir}${lt_dir}"
 sudo ./flash.sh --no-flash $device_type mmcblk0p1
 sudo ./flash.sh --rcm-boot $device_type mmcblk0p1
+
