@@ -31,7 +31,7 @@ Choose your device from the list below for step-by-step instructions:
 |[Jetson Xavier NX Devkit SD-CARD](./docs/jetson-xavier-nx-devkit.md) | L4T 32.7.3 |
 |[Jetson AGX Orin Devkit 32GB](./docs/jetson-agx-orin-devkit.md) | L4T 36.5.0 |
 |[Jetson AGX Orin Devkit 64GB](./docs/jetson-agx-orin-devkit-64gb.md) | L4T 36.5.0 |
-| [AVerMedia D315 AGX Orin 64GB](#avermedia-d315-agx-orin-64gb)                        | L4T 36.5.0          |
+| [AVerMedia D315 AGX Orin 32GB / 64GB](#avermedia-d315-agx-orin-32gb--64gb)          | L4T 36.5.0          |
 |[Jetson Orin Nano 8GB (SD) Devkit NVME](./docs/jetson-orin-nano-devkit-nvme.md) | L4T 36.5.0 |
 |[Jetson Orin NX in Xavier NX Devkit NVME](./docs/jetson-orin-nx-xavier-nx-devkit.md) | L4T 36.5.0 |
 |[Seeed reComputer J3010 4GB](./docs/jetson-orin-nano-seeed-j3010.md) | L4T 36.5.0 |
@@ -44,13 +44,15 @@ Choose your device from the list below for step-by-step instructions:
 
 ---
 
-## AVerMedia D315 AGX Orin 64GB
+## AVerMedia D315 AGX Orin 32GB / 64GB
 
-The AVerMedia D315 uses an AGX Orin 64GB SoM (p3701) on a custom carrier board.
-It is flashed using the `avermedia-d315-agx-orin-64gb` machine name. The balenaOS
-image being flashed is built as `jetson-agx-orin-devkit-64gb` (the "fake devkit"
-pattern) — this is intentional and must be preserved. The image includes the dtb 
-files for the avermedia and that's all that matters.
+The AVerMedia D315 uses an AGX Orin SoM (64GB = p3701-0005, 32GB = p3701-0004) on
+a custom carrier board. It is flashed using the `avermedia-d315-agx-orin-64gb` or
+`avermedia-d315-agx-orin-32gb` machine name depending on the module. In both cases
+the balenaOS image being flashed is built as `jetson-agx-orin-devkit-64gb` (the
+"fake devkit" pattern) — this is intentional and must be preserved. The image
+includes the dtb files for the avermedia and that's all that matters (for the 32GB
+module the image must ship `tegra234-p3737-0000+p3701-0004-nv-d315.dtb`).
 
 ### What this tool does for the D315
 
@@ -89,6 +91,8 @@ cd Orin_Flash
     -m avermedia-d315-agx-orin-64gb \
     --accept-license yes
 ```
+
+(use `-m avermedia-d315-agx-orin-32gb` for the 32GB module)
 
 ### Ending
 
