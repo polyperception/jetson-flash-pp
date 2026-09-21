@@ -53,6 +53,10 @@ const run = async options => {
 		throw new Error('Specified image is not a file');
 	}
 
+	if (options.cache !== undefined && options.cache === '') {
+		throw new Error('--cache needs the path of an L4T BSP directory');
+	}
+
 	options.output = options.output || tmpdir();
 
 	if (!path.isAbsolute(options.output)) {
@@ -114,8 +118,12 @@ const argv = yargs
 	.implies('p', 'o')
 	.example('$0 -f balena.img -p -o ./workdir --acceptLicense yes', '')
 	.alias('c', 'cache')
-	.boolean('c')
-	.describe('c', 'use cached bsp from dockerfile')
+	.string('c')
+	.describe(
+		'c',
+		'path to an L4T BSP to use instead of downloading one; the container image keeps one at /tmp/Linux_for_Tegra',
+	)
+	.example('$0 -f balena.img -m jetson-tx2 -c /tmp/Linux_for_Tegra', '')
 	.help('h')
 	.alias('h', 'help')
 	.epilog('Copyright 2020').argv;
