@@ -35,14 +35,14 @@ function help() {
     echo "where <device-type> can be one of"
     echo "    jetson-agx-orin-devkit-64gb"
     echo "    avermedia-d315-agx-orin-64gb  (uses AVerMedia D315 BSP; image must be jetson-agx-orin-devkit-64gb fake)"
-    echo "    avermedia-d315-agx-orin-32gb  (uses AVerMedia D315 BSP; image must be jetson-agx-orin-devkit-64gb fake)"
     echo "    jetson-orin-nx-xavier-nx-devkit"
     echo "    jetson-orin-nano-devkit-nvme"
     echo "    jetson-orin-nano-seeed-j3010"
     echo "    jetson-orin-nx-seeed-j4012"
     echo ""
-    echo "For avermedia-d315-agx-orin-*, bind-mount the AVerMedia BSP Linux_for_Tegra directory:"
-    echo " $ docker run ... -v /path/to/avermedia/JetPack_6.2_Linux_JETSON_desktop/Linux_for_Tegra:/data/avermedia-bsp:ro ..."
+    echo "The AVerMedia D315 with a 32GB AGX Orin module is flashed like the AGX Orin"
+    echo "Devkit 32GB instead, with ./bin/cmd.js -m avermedia-d315-agx-orin-32gb."
+    echo "See docs/avermedia-d315-agx-orin-32gb.md"
 }
 
 # Parse arguments
@@ -97,15 +97,17 @@ elif [[ $balena_device_name = "jetson-agx-orin-devkit-64gb" ]]; then
 	device_type="jetson-agx-orin-devkit"
 	device_dtb="tegra234-p3737-0000+p3701-0005-nv.dtb"
 elif [[ $balena_device_name = "avermedia-d315-agx-orin-64gb" ]]; then
-	# The AVerMedia D315 uses an AGX Orin SoM (64GB = p3701-0005, 32GB = p3701-0004)
-	# with its own carrier-board-specific conf and DTBs.  The balenaOS image being
-	# flashed is built as jetson-agx-orin-devkit-64gb (faking devkit) — that is
-	# intentional and must be preserved.
+	# The AVerMedia D315 uses the AGX Orin 64GB SoC (p3701-0005) with its own
+	# carrier-board-specific conf and DTBs.  The balenaOS image being flashed is
+	# built as jetson-agx-orin-devkit-64gb (faking devkit) — that is intentional
+	# and must be preserved.
+	#
+	# This RCM-boot + USB flasher stick flow only applies to the 64GB module,
+	# because balena only supplies a flasher image for jetson-agx-orin-devkit-64gb.
+	# A D315 with a 32GB module is flashed like the AGX Orin Devkit 32GB, with
+	# ./bin/cmd.js -m avermedia-d315-agx-orin-32gb.
 	device_type="jetson-agx-orin-d315ao"
 	device_dtb="tegra234-p3737-0000+p3701-0005-nv-d315.dtb"
-elif [[ $balena_device_name = "avermedia-d315-agx-orin-32gb" ]]; then
-	device_type="jetson-agx-orin-d315ao"
-	device_dtb="tegra234-p3737-0000+p3701-0004-nv-d315.dtb"
 else
 	log ERROR "Unknown or unspecified device-type!"
 fi
