@@ -1,9 +1,11 @@
 # jetson-flash
+
 A set of tools that allows users to flash balenaOS on supported Jetson devices.
 
 <img src="flash.jpg">
 
 ## About
+
 Jetson Flash will extract the balenaOS image from a downloaded provisioned image (such as from balenaCloud) and then flash that image to a Jetson board connected to a host PC via USB.
 
 This tool invokes NVIDIA’s proprietary software to properly partition the boot media (such as eMMC) and place the required balenaOS software in the necessary location to make it bootable. Even on Jetson boards without eMMC, this tool may be necessary to initially flash balenaOS because of the way JetPack uses onboard QSPI flash memory for the bootloader. (In those cases, this tool can write to the QSPI so the device will be able to boot balenaOS from the SD card.)
@@ -29,19 +31,82 @@ Choose your device from the list below for step-by-step instructions:
 |[Jetson Xavier NX Devkit SD-CARD](./docs/jetson-xavier-nx-devkit.md) | L4T 32.7.3 |
 |[Jetson AGX Orin Devkit 32GB](./docs/jetson-agx-orin-devkit.md) | L4T 36.5.0 |
 |[Jetson AGX Orin Devkit 64GB](./docs/jetson-agx-orin-devkit-64gb.md) | L4T 36.5.0 |
+|[AVerMedia D315 AGX Orin 32GB](./docs/avermedia-d315-agx-orin-32gb.md) | L4T 36.5.0 |
+|[AVerMedia D315 AGX Orin 64GB](#avermedia-d315-agx-orin-64gb) | L4T 36.5.0 |
 |[Jetson Orin Nano 8GB (SD) Devkit NVME](./docs/jetson-orin-nano-devkit-nvme.md) | L4T 36.5.0 |
 |[Jetson Orin NX in Xavier NX Devkit NVME](./docs/jetson-orin-nx-xavier-nx-devkit.md) | L4T 36.5.0 |
 |[Seeed reComputer J3010 4GB](./docs/jetson-orin-nano-seeed-j3010.md) | L4T 36.5.0 |
 |[Seeed reComputer J4012 16GB](./docs/jetson-orin-nx-seeed-j4012.md) | L4T 36.5.0 |
 
 **Don't see your device listed?**
+
 - Use the closest match above to the Jetson module on your carrier board
 - Reach out to us on the [balena Forums](https://forums.balena.io/c/share-questions-or-issues-about-balena-jetson-flash-which-is-a-tool-that-allows-users-to-flash-balenaos-on-nvidia-jetson-devices/95)
-  
-License
--------
 
-The project is licensed under the Apache 2.0 license.
+---
 
-Photo by <a href="https://unsplash.com/@melodyp?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Mélody P</a> on <a href="https://unsplash.com/photos/thunder-through-field-wFN9B3s_iik?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
+## AVerMedia D315 AGX Orin 64GB
 
+The AVerMedia D315 uses an AGX Orin SoM on a custom carrier board. With a **64GB**
+module (p3701-0005) it is flashed using the `avermedia-d315-agx-orin-64gb` machine
+name and the RCM boot + USB flasher stick process described below. The balenaOS
+image being flashed is built as `jetson-agx-orin-devkit-64gb` (the "fake devkit"
+pattern) — this is intentional and must be preserved. The image includes the dtb
+files for the avermedia and that's all that matters.
+
+**With a 32GB module the process is different**: balena only supplies a flasher
+image for the `jetson-agx-orin-devkit-64gb` device type, so a 32GB D315 is flashed
+like the AGX Orin Devkit 32GB — `./bin/cmd.js -m avermedia-d315-agx-orin-32gb`,
+with a `jetson-agx-orin-devkit` image and no USB stick. See
+[AVerMedia D315 AGX Orin 32GB](./docs/avermedia-d315-agx-orin-32gb.md).
+
+### What this tool does for the D315
+
+Before invoking NVIDIA's `flash.sh`, the tool injects D315-specific files from the
+AVerMedia BSP into the L4T tree.
+
+### Prerequisites
+
+1. A balenaOS image built for `jetson-agx-orin-devkit-64gb` (version >= 7):
+
+   ```
+   balena-image-flasher-jetson-agx-orin-devkit-64gb.balenaos-img
+   ```
+
+2. The D315 board in USB recovery mode (power off / micro-USB cable connected
+   to the host / press factory reset button + power on).
+
+3. The USB stick with the image burnt on it (use `caligula burn <balena-image>.img`) plugged in.
+   Plug it in the USB 2.0 (NOT 3.0!) the closest from the board. Important to 
+   not use 3.0 as the 3.0 sometimes doesn't work.
+
+### Flashing
+
+**On the host**, set the BSP path and start the container:
+
+```bash
+cd Orin_Flash
+./build_and_run.sh
+```
+
+**Inside the container**, run the flash script:
+
+```bash
+./flash_orin.sh \
+    -f /data/images/<balena-image-name>img \
+    -m avermedia-d315-agx-orin-64gb \
+    --accept-license yes
+```
+
+### Ending
+
+The flash script is meant for regular devkit device. In the AVerMedia case, it's to the same behavior.
+If everything went fine, it will output something like :
+
+```bash
+[LOG] Once the device's fan starts spinning USB provisioning is started.
+[LOG] The internal flashing process takes around 5-10 minutes as the internal QSPI memory is flashed, please wait for the device to finish provisioning and to power itself off.
+[LOG] Once power LED turns off, remove the force recovery jumper if applicable as well as the provisioning USB KEY, then power on the device.
+```
+
+For AVerMedia, unplug the power cable and replug it. Once the fan stop spinning + LED is off, you can remove the USB stick and restart the board. It should be correctly flashed then.

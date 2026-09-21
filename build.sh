@@ -25,7 +25,7 @@ function log {
 }
 
 function help() {
-    echo "You can build and run the jetson-flash container using :\n $ ./build_and_run.sh -m [jetson-tx2|jetson-xavier-nx-devkit-tx2-nx|jetson-nano-emmc|jetson-nano-2gb-devkit|jetson-nano-qspi-sd|jetson-xavier|jetson-agx-orin-devkit|jetson-xavier-nx-devkit-emmc|jetson-xavier-nx-devkit"
+    echo "You can build and run the jetson-flash container using :\n $ ./build_and_run.sh -m [jetson-tx2|jetson-xavier-nx-devkit-tx2-nx|jetson-nano-emmc|jetson-nano-2gb-devkit|jetson-nano-qspi-sd|jetson-xavier|jetson-agx-orin-devkit|avermedia-d315-agx-orin-32gb|jetson-xavier-nx-devkit-emmc|jetson-xavier-nx-devkit"
 }
 
 # Parse arguments
@@ -54,7 +54,7 @@ done
 
 
 case "${DEVICE_TYPE}" in
-        jetson-agx-orin-devkit)
+        jetson-agx-orin-devkit|avermedia-d315-agx-orin-32gb)
             JETSON_FLASH_BSP_URL="https://developer.nvidia.com/downloads/embedded/l4t/r36_release_v5.0/release/Jetson_Linux_r36.5.0_aarch64.tbz2"
             ;;
         jetson-nano-qspi-sd)
