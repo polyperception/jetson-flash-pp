@@ -1,4 +1,81 @@
 - commits:
+    - subject: "docs/jetson-agx-orin-devkit: Add mention about 64GB Devkit"
+      hash: 26f9c868530130d25cdea44a518689775e3290e2
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Alexandru Costache <alexandru@balena.io>
+        signed-off-by: Alexandru Costache <alexandru@balena.io>
+      author: Alexandru
+  version: 0.5.102
+  title: ""
+  date: 2026-09-15T15:22:44.152Z
+- commits:
+    - subject: Update flowzonify to v0.4.0
+      hash: e7255e0efecc4e9a7c17aafd540c7f5c7bd1e28a
+      body: |
+        Update flowzonify from 0.0.0 to 0.4.0
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: balena-renovate[bot]
+  version: 0.5.101
+  title: ""
+  date: 2026-08-25T16:47:07.260Z
+- commits:
+    - subject: Update Pin dependencies
+      hash: 4096bdf42f181d514d0eb08d806fb5432b01ac72
+      body: |
+        Update balenalib/amd64-ubuntu
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: balena-renovate[bot]
+  version: 0.5.100
+  title: ""
+  date: 2026-08-25T14:53:27.264Z
+- commits:
+    - subject: "renovate: Fix config file path"
+      hash: 94804a038068f7648b45150d63f8ab094bdcb6ce
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Kyle Harding <kyle@balena.io>
+        signed-off-by: Kyle Harding <kyle@balena.io>
+      author: Kyle Harding
+  version: 0.5.99
+  title: ""
+  date: 2026-08-25T13:50:05.868Z
+- commits:
+    - subject: Add Renovate config extending balena-io/renovate-config
+      hash: 688ed6c233b9244fca45ff35537e0fa4d6100768
+      body: |
+        Avoids enforcing Changelog-entry footers on this repo
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Kyle Harding <kyle@balena.io>
+        signed-off-by: Kyle Harding <kyle@balena.io>
+      author: Kyle Harding
+  version: 0.5.98
+  title: ""
+  date: 2026-08-24T22:40:44.810Z
+- commits:
+    - subject: "jetson-flash/Orin_Flash: Add L4T 39.2.0 updates"
+      hash: 8ec28810a344d2bf5231cf7573991ed4b08cd48f
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Alexandru Costache <alexandru@balena.io>
+        signed-off-by: Alexandru Costache <alexandru@balena.io>
+      author: Alexandru Costache
+  version: 0.5.97
+  title: ""
+  date: 2026-08-24T17:30:01.610Z
+- commits:
     - subject: "AGX Orin 32GB: Update uefi_jetson.bin 36.5.0"
       hash: e6d66daecefaabe41ca5c8fa58adfe2bd382cd0e
       body: ""
