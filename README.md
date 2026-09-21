@@ -29,14 +29,14 @@ Choose your device from the list below for step-by-step instructions:
 |[Jetson AGX Xavier](./docs/jetson-xavier.md) | L4T 32.7.3 |
 |[Jetson Xavier NX Devkit eMMC](./docs/jetson-xavier-nx-devkit-emmc.md) | L4T 32.7.3 |
 |[Jetson Xavier NX Devkit SD-CARD](./docs/jetson-xavier-nx-devkit.md) | L4T 32.7.3 |
-|[Jetson AGX Orin Devkit 32GB](./docs/jetson-agx-orin-devkit.md) | L4T 36.5.0 |
-|[Jetson AGX Orin Devkit 64GB](./docs/jetson-agx-orin-devkit-64gb.md) | L4T 36.5.0 |
-|[AVerMedia D315 AGX Orin 32GB](./docs/avermedia-d315-agx-orin-32gb.md) | L4T 36.5.0 |
-|[AVerMedia D315 AGX Orin 64GB](#avermedia-d315-agx-orin-64gb) | L4T 36.5.0 |
-|[Jetson Orin Nano 8GB (SD) Devkit NVME](./docs/jetson-orin-nano-devkit-nvme.md) | L4T 36.5.0 |
-|[Jetson Orin NX in Xavier NX Devkit NVME](./docs/jetson-orin-nx-xavier-nx-devkit.md) | L4T 36.5.0 |
-|[Seeed reComputer J3010 4GB](./docs/jetson-orin-nano-seeed-j3010.md) | L4T 36.5.0 |
-|[Seeed reComputer J4012 16GB](./docs/jetson-orin-nx-seeed-j4012.md) | L4T 36.5.0 |
+|[Jetson AGX Orin Devkit 32GB](./docs/jetson-agx-orin-devkit.md) | L4T 39.2.0 |
+|[Jetson AGX Orin Devkit 64GB](./docs/jetson-agx-orin-devkit-64gb.md) | L4T 39.2.0 |
+|[AVerMedia D315 AGX Orin 32GB](./docs/avermedia-d315-agx-orin-32gb.md) | L4T 39.2.0 |
+|[AVerMedia D315 AGX Orin 64GB](#avermedia-d315-agx-orin-64gb) | L4T 39.2.0 |
+|[Jetson Orin Nano 8GB (SD) Devkit NVME](./docs/jetson-orin-nano-devkit-nvme.md) | L4T 39.2.0 |
+|[Jetson Orin NX in Xavier NX Devkit NVME](./docs/jetson-orin-nx-xavier-nx-devkit.md) | L4T 39.2.0 |
+|[Seeed reComputer J3010 4GB](./docs/jetson-orin-nano-seeed-j3010.md) | L4T 39.2.0 |
+|[Seeed reComputer J4012 16GB](./docs/jetson-orin-nx-seeed-j4012.md) | L4T 39.2.0 |
 
 **Don't see your device listed?**
 

@@ -32,6 +32,10 @@ instead of `jetson-agx-orin-devkit`. That configuration sources
 D315 DTB from the module SKU read off the SoM EEPROM (`0000`/`0001`/`0002` and
 `0004` are the 32GB SKUs).
 
+The carrier-board files above come from AVerMedia's JetPack 6 (L4T 36.5) BSP and
+are copied into the L4T 39.2.0 tree this tool downloads, which AVerMedia does not
+yet ship a BSP for. Check the pinmux/GPIO overlays still apply if a flash fails.
+
 `p3701.conf.common` is deliberately left alone: the copy AVerMedia ships carries
 no D315-specific change, so the stock file from the downloaded BSP is used rather
 than mixing in one from another L4T release.
