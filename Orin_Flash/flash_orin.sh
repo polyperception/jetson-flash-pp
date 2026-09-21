@@ -113,9 +113,11 @@ else
 fi
 
 # inject_avermedia_d315_bsp: copies AVerMedia D315 carrier-board-specific files
-# (conf, DTBs) into the L4T BSP tree so that flash.sh picks up the correct
-# hardware configuration.
-# The D315 uses standard devkit pinmux and MB2 BCT — no custom injection needed.
+# (conf, DTB, pinmux and GPIO BCT overlays) into the L4T BSP tree so that
+# flash.sh picks up the correct hardware configuration.
+# p3701.conf.common is deliberately not copied: AVerMedia's copy only carries an
+# older CMDLINE_ADD, and setup_orin_rcmboot needs the stock console=tty0 in it to
+# splice in the flasher boot arguments.
 # The balenaOS image being flashed remains the jetson-agx-orin-devkit-64gb
 # fake — this only affects the low-level RCM boot/flash configuration.
 function inject_avermedia_d315_bsp() {
@@ -129,7 +131,6 @@ function inject_avermedia_d315_bsp() {
     log "Injecting AVerMedia D315 BSP files into L4T BSP tree..."
 
 	cp "${avermedia_bsp}/jetson-agx-orin-d315ao.conf" "${device_dir}${lt_dir}/"
-	cp "${avermedia_bsp}/p3701.conf.common" "${device_dir}${lt_dir}/"
 	cp "${avermedia_bsp}/${device_dtb}" "${device_dir}${lt_dir}/kernel/dtb/"
 	cp "${avermedia_bsp}/tegra234-mb1-bct-pinmux-p3701-0000-a04.dtsi" "${device_dir}${lt_dir}/bootloader/generic/BCT/"
 	cp "${avermedia_bsp}/tegra234-mb1-bct-gpio-p3701-0000-a04.dtsi" "${device_dir}${lt_dir}/bootloader/"
