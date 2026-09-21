@@ -27,18 +27,19 @@ Before invoking NVIDIA's `flash.sh` it copies these files from
 | `tegra234-mb1-bct-gpio-p3701-0000-a04.dtsi` | `bootloader/` |
 
 `flash.sh` is then run with the `jetson-agx-orin-d315ao` board configuration
-instead of `jetson-agx-orin-devkit`. That configuration sources
-`jetson-agx-orin-devkit.conf` and only overrides the device tree, selecting the
-D315 DTB from the module SKU read off the SoM EEPROM (`0000`/`0001`/`0002` and
+instead of `jetson-agx-orin-devkit`. That configuration is AVerMedia's copy of
+the stock `jetson-agx-orin-devkit.conf`, differing only in the device tree it
+selects from the module SKU read off the SoM EEPROM (`0000`/`0001`/`0002` and
 `0004` are the 32GB SKUs).
 
-The carrier-board files above come from AVerMedia's JetPack 6 (L4T 36.5) BSP and
-are copied into the L4T 39.2.0 tree this tool downloads, which AVerMedia does not
-yet ship a BSP for. Check the pinmux/GPIO overlays still apply if a flash fails.
+All of the files above are taken verbatim from `Linux_for_Tegra/settings/D315/`
+of AVerMedia's JetPack 7.2 BSP (`AVERMEDIA_JETPACK-R4.0.2.7.2.0`), which matches
+the L4T 39.2.0 release this tool downloads. Refresh them from `settings/D315/`
+whenever the L4T release in `lib/resin-jetson-flash.js` is bumped.
 
-`p3701.conf.common` is deliberately left alone: the copy AVerMedia ships carries
-no D315-specific change, so the stock file from the downloaded BSP is used rather
-than mixing in one from another L4T release.
+`p3701.conf.common` is deliberately left alone: AVerMedia's copy differs from the
+stock 39.2.0 one only in `CMDLINE_ADD`, and theirs is the older kernel command
+line, so the stock file from the downloaded BSP is used instead.
 
 ## balenaOS image
 

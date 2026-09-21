@@ -28,14 +28,21 @@
 
 # p3701.conf.common: configuration for "P3701"
 
+# Sourced by bash script.
+# shellcheck shell=bash
+# Disable unused variable check. Most of these variables are used in an outer
+# script that sources this file.
+# shellcheck disable=SC2034,SC2154
+
 sub_var_token()
 {
 	local var="$1";
 	local from="$2";
 	local to="$3";
-	if [ "${var}" != "" -a "${!var}" != "" ]; then
-		if [[ "${!var}" =~ "${from}" ]]; then
-			local val=`echo "${!var}" | sed -e s/${from}/${to}/`;
+	if [ "${var}" != "" ] && [ "${!var}" != "" ]; then
+		if [[ "${!var}" =~ ${from} ]]; then
+			local val;
+			val=$(echo "${!var}" | sed -r "s/${from}/${to}/");
 			eval "${var}=${val}";
 		fi;
 	fi;
@@ -61,12 +68,13 @@ process_chip_sku_version()
 	chip_sku="${chip_sku:-${DEFAULT_CHIP_SKU}}"
 
 	if [[ "${chip_sku}" =~ ":" ]]; then
-		chip_SKU=`echo "${chip_sku}" | awk -F ":" '{print $4}'`;
+		chip_SKU=$(echo "${chip_sku}" | awk -F ":" '{print $4}');
 	fi;
 
 	# do not override BPFFILE for INT SKU "00"
 	if [ "${chip_SKU}" != "00" ]; then
-		BPFFILE=`echo "${BPFFILE}" | sed "s|T.*-A1|${bpmp_fw_binary[${chip_SKU}]}|"`;
+		# shellcheck disable=SC2001
+		BPFFILE=$(echo "${BPFFILE}" | sed "s|T.*-A1|${bpmp_fw_binary[${chip_SKU}]}|");
 	fi;
 
 	echo "Chip SKU(${chip_sku}) ramcode(${ramcode}) fuselevel(${fuselevel}) board_FAB(${board_FAB})"
@@ -93,11 +101,11 @@ process_board_version()
 	# SKU0, SKU2, SKU4 modules uses the default.  Override for other SKUs.
 	if [ "${board_sku}" = "0005" ]; then
 		# p3701-0005 (64GB)
-		EMMC_BCT="tegra234-p3701-0005-sdram-l4t.dts";
+		EMC_BCT="tegra234-p3701-0005-sdram-l4t.dts";
 		WB0SDRAM_BCT="tegra234-p3701-0005-wb0sdram-l4t.dts";
 	elif [ "${board_sku}" = "0008" ]; then
 		# p3701-0008 (64GB)
-		EMMC_BCT="tegra234-p3701-0008-sdram-l4t.dts";
+		EMC_BCT="tegra234-p3701-0008-sdram-l4t.dts";
 		WB0SDRAM_BCT="tegra234-p3701-0008-wb0sdram-l4t.dts";
 	fi
 	if [ "${kdump_enable}" -eq 1 ]; then
@@ -151,13 +159,22 @@ process_fuse_level()
 	sub_var_token "IST_BPMPFW"    "${srctoken}" "${trgtoken}";
 }
 
+# shellcheck disable=SC2120
+set_uefi_bins() {
+	UEFI_IMAGE="${1:-uefi_t23x_general}"
+	UEFIBL="${UEFI_IMAGE}_with_dtb.bin";
+	RCM_UEFIBL="${UEFI_IMAGE}_with_dtb.bin";
+	TBCFILE="bootloader/uefi_bins/${UEFI_IMAGE}.bin";
+	RCM_TBCFILE="bootloader/uefi_bins/${UEFI_IMAGE}.bin";
+}
+
 # Common values and/or defaults across P3701:
 
 ODMDATA="gbe-uphy-config-22,hsstp-lane-map-3,nvhs-uphy-config-0,hsio-uphy-config-0,gbe0-enable-10g";
 CHIPID=0x23;
 ITS_FILE=;
-OVERLAY_DTB_FILE="L4TConfiguration.dtbo,tegra234-p3701-overlay.dtbo";
-CMDLINE_ADD="mminit_loglevel=4 console=ttyTCU0,115200 console=ttyAMA0,115200 firmware_class.path=/etc/firmware fbcon=map:0 video=efifb:off console=tty0"
+OVERLAY_DTB_FILE="L4TConfiguration.dtbo,tegra234-p3701-overlay.dtbo,T234SetFmpImageTypeGuid.dtbo";
+CMDLINE_ADD="mminit_loglevel=4 console=ttyTCU0,115200 console=ttyAMA0,115200 firmware_class.path=/etc/firmware fbcon=map:0 video=efifb:off efi_pstore.pstore_disable=1 pstore.backend=ramoops efi=runtime nvme.use_threaded_interrupts=1"
 target_board="generic";
 ROOTFSSIZE=55GiB;
 ROOT_DEV="mmcblk0p1 ------------ internal eMMC.
@@ -166,10 +183,7 @@ ROOT_DEV="mmcblk0p1 ------------ internal eMMC.
         eth1 ----------------- nfsroot via USB Ethernet interface.";
 TEGRABOOT="bootloader/mb2_t234.bin";
 BOOTLOADER="bootloader/mb2_t234.bin";
-UEFIBL="uefi_jetson_with_dtb.bin";
-RCM_UEFIBL="uefi_jetson_minimal_with_dtb.bin";
-TBCFILE="bootloader/uefi_jetson.bin";
-RCM_TBCFILE="bootloader/uefi_jetson_minimal.bin";
+set_uefi_bins
 BPFFILE="bootloader/bpmp_t234-TE990M-A1_prod.bin";
 TOSFILE="bootloader/tos_t234.img";
 EKSFILE="bootloader/eks_t234.img";
@@ -202,7 +216,7 @@ UEFI_OS_LAUNCHER=1;
 #
 BCT="--sdram_config";
 BINSARGS="--bins \"";
-EMMC_BCT="tegra234-p3701-0000-sdram-l4t.dts";
+EMC_BCT="tegra234-p3701-0000-sdram-l4t.dts";
 WB0SDRAM_BCT="tegra234-p3701-0000-wb0sdram-l4t.dts";
 MISC_CONFIG="tegra234-mb1-bct-misc-p3701-0000.dts";
 DEV_PARAMS="tegra234-br-bct-p3701-0000.dts";
@@ -237,10 +251,18 @@ OTA_GPT_DEVICE="/dev/mtdblock0";
 # Rollback protection
 MINRATCHET_CONFIG="tegra234-mb1-bct-ratchet-p3701-0000.dts";
 
+# Storage device size
+STORAGE_SIZE_57GiB=$(( 57 * 1024 * 1024 * 1024 ));
+# The default internal user storage size is 57GiB
+INT_STORAGE_SIZE="${STORAGE_SIZE_57GiB}";
+# The default external user storage size is 57GiB
+EXT_STORAGE_SIZE="${STORAGE_SIZE_57GiB}";
+
 # Rootfs A/B:
+# shellcheck disable=SC2153
 if [ "${ROOTFS_AB}" == 1 ]; then
 	rootfs_ab=1;
-	val=$(echo ${ROOTFSSIZE} | sed 's/GiB//g');
-	val=`expr ${val} / 2`;
+	val=${ROOTFSSIZE//GiB/}
+	val=$((val/2))
 	ROOTFSSIZE="${val}GiB";
 fi;
